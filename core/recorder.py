@@ -24,7 +24,9 @@ class VideoRecorder:
         if self.recording:
             return
 
-        self.open_camera()
+        if not self.cam or not self.cam.isOpened():
+            self.open_camera()
+
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         folder = os.path.join(self.save_dir, f"recording_{now}")
         os.makedirs(folder, exist_ok=True)
@@ -40,12 +42,16 @@ class VideoRecorder:
         self.recording = True
 
     def write_frame(self):
-        if not self.recording:
+        if self.cam is None:
             return None
 
         ret, frame = self.cam.read()
-        if ret:
+        if not ret:
+            return None
+
+        if self.recording and self.writer:
             self.writer.write(frame)
+
         return frame
 
     def stop(self):

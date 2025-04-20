@@ -10,16 +10,17 @@ from core.gpio import GPIOController
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    video = VideoRecorder()
+    video0 = VideoRecorder(device_index='/dev/video0')
+    video2 = VideoRecorder(device_index='/dev/video2')
     audio = AudioRecorder()
-    window = MainWindow(video, audio)
-    web = WebControl(video, audio)
-    gpio = GPIOController(video, audio)
-
-    web.start_background()
+    window = MainWindow(video0,video2, audio)
+    # web = WebControl(video0, audio)
+    # gpio = GPIOController(video0, audio)
+    # web.start_background()
     window.show()
 
-    try:
-        sys.exit(app.exec())
-    finally:
-        gpio.stop()
+    sys.exit(app.exec())
+    # try:
+    #     sys.exit(app.exec())
+    # finally:
+    #     gpio.stop()
