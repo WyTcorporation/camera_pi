@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="36988bf4-2f43-48f8-8a2d-a39bb0af382e" name="Camera_PI">
+        <fileTransfer accessType="SFTP" host="192.168.10.225" port="22" sshConfigId="5d2ac623-4377-4308-a4bf-377e70d169ff" sshConfig="wytcorp@192.168.10.225:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
