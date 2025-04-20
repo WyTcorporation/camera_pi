@@ -31,7 +31,12 @@ class VideoRecorder:
         folder = os.path.join(self.save_dir, f"recording_{now}")
         os.makedirs(folder, exist_ok=True)
 
-        filename = os.path.join(folder, f"cam{self.device_index}.mp4")
+        if isinstance(self.device_index, str):
+            name_suffix = os.path.basename(self.device_index)
+        else:
+            name_suffix = str(self.device_index)
+
+        filename = os.path.join(folder, f"cam{name_suffix}.mp4")
         self.current_file = filename
         self.writer = cv2.VideoWriter(
             filename,
@@ -46,7 +51,7 @@ class VideoRecorder:
             return None
 
         ret, frame = self.cam.read()
-        if not ret:
+        if not ret or frame is None:
             return None
 
         if self.recording and self.writer:
@@ -57,8 +62,8 @@ class VideoRecorder:
     def stop(self):
         if self.writer:
             self.writer.release()
-        if self.cam:
-            self.cam.release()
+        # if self.cam:
+        #     self.cam.release()
         self.recording = False
 
     def get_resolution(self):
