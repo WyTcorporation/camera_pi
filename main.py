@@ -14,9 +14,15 @@ if __name__ == '__main__':
     video2 = VideoRecorder(device_index='/dev/video2')
     audio = AudioRecorder()
     window = MainWindow(video0,video2, audio)
-    # web = WebControl(video0, audio)
+
     # gpio = GPIOController(video0, audio)
-    # web.start_background()
+
+    video_recorders = {
+        "cam0": video0,
+        "cam2": video2
+    }
+    web = WebControl(video_recorders, audio)
+    web.start_background()
     window.show()
 
     sys.exit(app.exec())

@@ -12,6 +12,7 @@ class AudioRecorder:
 
         self.process = None
         self.current_file = None
+        self.recording = False
 
     def start(self):
         now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -30,10 +31,13 @@ class AudioRecorder:
             filename
         ])
 
+        self.recording = True
+
     def stop(self):
         if self.process:
             self.process.terminate()
             self.process = None
+            self.recording = False
 
     def get_file_path(self):
         return self.current_file

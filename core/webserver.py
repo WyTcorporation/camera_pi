@@ -1,13 +1,23 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import threading
+import os
 
 class WebControl:
-    def __init__(self, video_recorder, audio_recorder):
-        self.video = video_recorder
+    def __init__(self, video_recorders, audio_recorder):
+        self.videos = video_recorders
         self.audio = audio_recorder
         self.app = FastAPI()
 
+        # HTML шаблони та статика
+        root_path = os.path.dirname(os.path.abspath(__file__))
+        self.templates = Jinja2Templates(directory=os.path.join(root_path, "../templates"))
+        self.app.mount("/static", StaticFiles(directory=os.path.join(root_path, "../static")), name="static")
+
+        # Роутинг
+        self.app.get("/", response_class=HTMLResponse)(self.index)
         self.app.get("/start")(self.start_recording)
         self.app.get("/stop")(self.stop_recording)
         self.app.get("/status")(self.get_status)
@@ -20,25 +30,43 @@ class WebControl:
         import uvicorn
         uvicorn.run(self.app, host="0.0.0.0", port=8080, log_level="info")
 
-    def start_recording(self):
-        if not self.video.recording:
-            self.video.start()
+    async def index(self, request: Request):
+        return self.templates.TemplateResponse("index.html", {"request": request})
+
+    async def start_recording(self, request: Request = None):
+        started = False
+
+        for video in self.videos.values():
+            if not video.recording:
+                video.start()
+                started = True
+
+        if not self.audio.recording:
             self.audio.start()
-            return JSONResponse({"status": "recording started"})
-        return JSONResponse({"status": "already recording"})
+            started = True
 
-    def stop_recording(self):
-        if self.video.recording:
-            self.video.stop()
+        return JSONResponse({"status": "recording started" if started else "already recording"})
+
+    async def stop_recording(self, request: Request = None):
+        stopped = False
+
+        for video in self.videos.values():
+            if video.recording:
+                video.stop()
+                stopped = True
+
+        if self.audio.recording:
             self.audio.stop()
-            return JSONResponse({"status": "recording stopped"})
-        return JSONResponse({"status": "not recording"})
+            stopped = True
 
-    def get_status(self):
-        return JSONResponse({"recording": self.video.recording})
+        return JSONResponse({"status": "recording stopped" if stopped else "already stopped"})
 
-    def get_last_file(self):
-        return JSONResponse({
-            "video": self.video.get_file_path(),
-            "audio": self.audio.get_file_path()
-        })
+    async def get_status(self, request: Request = None):
+        status = {name: video.recording for name, video in self.videos.items()}
+        status["audio"] = self.audio.recording
+        return JSONResponse(status)
+
+    async def get_last_file(self, request: Request = None):
+        files = {name: video.get_file_path() for name, video in self.videos.items()}
+        files["audio"] = self.audio.get_file_path()
+        return JSONResponse(files)
