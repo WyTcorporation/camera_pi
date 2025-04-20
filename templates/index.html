@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-<title>Відео Рекордер</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
-    <script src="/static/js/scripts.js"></script>
+  <meta charset="UTF-8">
+  <title>Керування відеозаписом</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
 </head>
 <body>
-<h1>🎥 Керування відеозаписом</h1>
-<button onclick="startRecording()">▶️ Старт</button>
-<button onclick="stopRecording()">⏹️ Стоп</button>
-<p id="status">Статус: невідомий</p>
+  <div class="container">
+    <h1>🎥 Керування відеозаписом</h1>
+    <div class="buttons">
+      <button onclick="startRecording()">▶️ Старт</button>
+      <button onclick="stopRecording()">⏹️ Стоп</button>
+    </div>
+    <div id="status" class="status-box">Статус: ⏳ Завантаження...</div>
+  </div>
+  <script src="/static/js/scripts.js"></script>
 </body>
 </html>

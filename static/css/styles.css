@@ -1,0 +1,41 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #121212;
+  color: #eee;
+  text-align: center;
+  padding: 40px;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #000;
+}
+
+.buttons button {
+  font-size: 20px;
+  padding: 10px 30px;
+  margin: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #007BFF;
+  color: white;
+  transition: 0.3s;
+}
+
+.buttons button:hover {
+  background: #0056b3;
+}
+
+.status-box {
+  margin-top: 20px;
+  font-size: 18px;
+  background: #2a2a2a;
+  padding: 10px;
+  border-radius: 8px;
+  line-height: 1.6;
+}

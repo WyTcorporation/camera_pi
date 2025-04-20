@@ -6,9 +6,10 @@ import threading
 import os
 
 class WebControl:
-    def __init__(self, video_recorders, audio_recorder):
+    def __init__(self, video_recorders, audio_recorder, gui_ref=None):
         self.videos = video_recorders
         self.audio = audio_recorder
+        self.gui = gui_ref
         self.app = FastAPI()
 
         # HTML шаблони та статика
@@ -35,6 +36,8 @@ class WebControl:
 
     async def start_recording(self, request: Request = None):
         started = False
+        if self.gui:
+            self.gui.update_status_label("🔴 Запис з веб-інтерфейсу")
 
         for video in self.videos.values():
             if not video.recording:
@@ -49,6 +52,8 @@ class WebControl:
 
     async def stop_recording(self, request: Request = None):
         stopped = False
+        if self.gui:
+            self.gui.update_status_label("⏹️ Зупинено через веб")
 
         for video in self.videos.values():
             if video.recording:

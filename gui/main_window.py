@@ -107,3 +107,7 @@ class MainWindow(QWidget):
         self.video2.stop()
         self.audio.stop()
         super().closeEvent(event)
+
+    def update_status_label(self, text):
+        self.status_label.setText(f"Статус: {text}")
+        self.log(f"{text}")

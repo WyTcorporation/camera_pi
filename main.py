@@ -21,7 +21,7 @@ if __name__ == '__main__':
         "cam0": video0,
         "cam2": video2
     }
-    web = WebControl(video_recorders, audio)
+    web = WebControl(video_recorders, audio, gui_ref=window)
     web.start_background()
     window.show()
 
