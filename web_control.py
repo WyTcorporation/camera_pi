@@ -1,22 +1,21 @@
-import subprocess, os, signal, time
-from gpiozero import Button, LED
-from signal import pause
+from flask import Flask, render_template, redirect, jsonify
+import os, signal, subprocess, time
 
-# GPIO-кнопки та LED
-btn_start = Button(17, bounce_time=0.2)
-btn_pause = Button(22, bounce_time=0.2)
-btn_stop = Button(27, bounce_time=0.2)
-led = LED(23)
+app = Flask(__name__)
 
+proc1 = proc2 = None
 recording = False
 paused = False
-proc1 = proc2 = None
 
-def start_recording():
-    global recording, proc1, proc2
+@app.route('/')
+def index():
+    return render_template('index.html', recording=recording, paused=paused)
+
+@app.route('/start')
+def start():
+    global recording, proc1, proc2, paused
     if recording:
-        print("Запис вже триває.")
-        return
+        return redirect('/')
 
     date = time.strftime("%Y-%m-%d_%H-%M-%S")
     folder = f"/home/wytcorp/Projects/video_recorder/records/recording_{date}"
@@ -38,41 +37,41 @@ def start_recording():
     proc2 = subprocess.Popen(cmd_cam2)
 
     recording = True
-    led.on()
-    print("Запис розпочато.")
+    paused = False
 
+    return redirect('/')
+
+@app.route('/pause')
 def pause_recording():
     global paused
     if recording and not paused:
         proc1.send_signal(signal.SIGSTOP)
         proc2.send_signal(signal.SIGSTOP)
         paused = True
-        led.blink()
-        print("Запис на паузі.")
+    return redirect('/')
 
+@app.route('/resume')
 def resume_recording():
     global paused
     if recording and paused:
         proc1.send_signal(signal.SIGCONT)
         proc2.send_signal(signal.SIGCONT)
         paused = False
-        led.on()
-        print("Запис продовжено.")
+    return redirect('/')
 
-def stop_recording():
+@app.route('/stop')
+def stop():
     global recording, paused
     if recording:
         proc1.terminate()
         proc2.terminate()
         recording = False
         paused = False
-        led.off()
-        print("Запис зупинено.")
+    return redirect('/')
 
-# Прив'язка кнопок
-btn_start.when_pressed = start_recording
-btn_pause.when_pressed = lambda: pause_recording() if not paused else resume_recording()
-btn_stop.when_pressed = stop_recording
+@app.route('/status')
+def status():
+    return jsonify({'recording': recording, 'paused': paused})
 
-print("Система готова до роботи. Очікування натискання кнопок...")
-pause()
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=False)

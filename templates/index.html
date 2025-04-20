@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Raspberry Pi Video Control</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        button { padding: 15px 30px; margin: 10px; font-size: 20px; cursor: pointer; }
+        .start { background: green; color: white; }
+        .stop { background: red; color: white; }
+        .pause { background: orange; color: black; }
+    </style>
+</head>
+<body>
+    <h1>Raspberry Pi Video Control</h1>
+
+    {% if not recording %}
+        <a href="/start"><button class="start">Старт</button></a>
+    {% else %}
+        {% if not paused %}
+            <a href="/pause"><button class="pause">Пауза</button></a>
+        {% else %}
+            <a href="/resume"><button class="pause">Продовжити</button></a>
+        {% endif %}
+        <a href="/stop"><button class="stop">Стоп</button></a>
+    {% endif %}
+
+    <p>
+        Статус запису:
+        {% if recording %}
+            {% if paused %}
+                <strong style="color:orange;">На паузі</strong>
+            {% else %}
+                <strong style="color:green;">Йде запис...</strong>
+            {% endif %}
+        {% else %}
+            <strong style="color:red;">Запис зупинено</strong>
+        {% endif %}
+    </p>
+
+    <script>
+        setInterval(() => {
+            fetch('/status').then(resp => resp.json()).then(data => {
+                location.reload();
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

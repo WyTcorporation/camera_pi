@@ -45,7 +45,7 @@ Pi GPIO23 (пін 16) → Резистор 220Ω → (+) світлодіод (-
 
 ```
 
-    sudo apt install python3-gpiozero
+    sudo apt install python3-gpiozero python3-picamera2
     python3 
 ```
 
@@ -76,10 +76,10 @@ LED має засвітитись.
 ```
     mkdir ~/video_recorder
     cd ~/video_recorder
-    nano recorder.py
+    nano main.py
 ```
 
-🖥️ Код основного скрипту (recorder.py):
+🖥️ Код основного скрипту (main.py):
 
 ```
     import subprocess, os, signal, time
@@ -103,7 +103,7 @@ LED має засвітитись.
             return
     
         date = time.strftime("%Y-%m-%d_%H-%M-%S")
-        folder = f"/mnt/usb/recording_{date}"
+        folder = f"~/Projects/video_recorder/records/recording_{date}"
         os.makedirs(folder, exist_ok=True)
     
         cmd_cam1 = ["ffmpeg", "-f", "v4l2", "-framerate", "30",
@@ -163,7 +163,7 @@ LED має засвітитись.
 
 Запуск для тесту:
 ```
-    python3 recorder.py
+    python3 main.py
 ```
 
 🚀 5. Автозапуск скрипту при старті ОС (опціонально)
@@ -172,9 +172,17 @@ LED має засвітитись.
 
 Додай перед рядком exit 0:
 
-```python3 /home/pi/video_recorder/recorder.py &```
+```
+#!/bin/sh -e
+python3 /home/wytcorp/Projects/video_recorder/main.py &
+exit 0
+
+```
+
+```sudo chmod +x /etc/rc.local```
 
 🎬 Перевірка роботи:
 Натискай кнопки Старт, Пауза, Стоп.
 
 Відео повинні зберігатись у папку /mnt/usb.
+

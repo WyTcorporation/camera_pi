@@ -1,4 +1,4 @@
-udo apt install v4l-utils
+sudo apt install v4l-utils
 v4l2-ctl --list-devices
 v4l2-ctl --device=/dev/video0 --list-formats-ext
 Це видасть приблизно таке:

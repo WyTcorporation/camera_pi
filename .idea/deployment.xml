@@ -5,8 +5,11 @@
       <paths name="Camera_PI">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/wytcorp/Projects" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/wytcorp/Projects/video_recorder" local="$PROJECT_DIR$" web="/" />
           </mappings>
+          <excludedPaths>
+            <excludedPath path="/home/wytcorp/Projects/video_recorder" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>
