@@ -1,8 +1,7 @@
 import sys
-import subprocess
-import shutil
 import cv2
-import threading
+import shutil
+import subprocess
 from datetime import datetime
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QPushButton, QVBoxLayout, QLabel, QTextEdit, QHBoxLayout, QGridLayout
@@ -13,23 +12,42 @@ from PyQt6.QtGui import QFont, QImage, QPixmap
 class VideoRecorderApp(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Raspberry Pi Video Recorder")
+        self.setWindowTitle("Video Recorder FINAL")
         self.setGeometry(100, 100, 960, 600)
-
-        self.proc1 = None
-        self.proc2 = None
-        self.recording = False
-        self.paused = False
 
         self.cam0 = cv2.VideoCapture(0)
         self.cam2 = cv2.VideoCapture(2)
 
+        # Read true frame sizes and FPS
+        self.w0 = int(self.cam0.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.h0 = int(self.cam0.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.fps0 = self.cam0.get(cv2.CAP_PROP_FPS)
+        # if self.fps0 <= 0: self.fps0 = 30
+
+        self.w2 = int(self.cam2.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.h2 = int(self.cam2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.fps2 = self.cam2.get(cv2.CAP_PROP_FPS)
+        # if self.fps2 <= 0: self.fps2 = 30
+
+        self.fps0 = 15
+        self.fps2 = 15
+
+
+        self.writer0 = None
+        self.writer2 = None
+        self.audio_proc = None
+
+        self.recording = False
+
         self.init_ui()
         self.update_disk_space()
 
-        self.timer_preview = QTimer()
-        self.timer_preview.timeout.connect(self.update_preview)
-        self.timer_preview.start(30)
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_preview)
+
+
+        # self.timer.start(1000 // int(max(self.fps0, self.fps2)))
+        self.timer.start(1000 // 15)
 
         self.disk_timer = QTimer()
         self.disk_timer.timeout.connect(self.update_disk_space)
@@ -47,15 +65,12 @@ class VideoRecorderApp(QWidget):
         self.disk_label.setFont(QFont("Arial", 12))
 
         self.start_btn = QPushButton("▶️ Старт")
-        self.pause_btn = QPushButton("⏸️ Пауза")
         self.stop_btn = QPushButton("⏹️ Стоп")
 
         self.start_btn.setFont(font)
-        self.pause_btn.setFont(font)
         self.stop_btn.setFont(font)
 
         self.start_btn.clicked.connect(self.start_recording)
-        self.pause_btn.clicked.connect(self.toggle_pause)
         self.stop_btn.clicked.connect(self.stop_recording)
 
         self.log_output = QTextEdit()
@@ -73,7 +88,6 @@ class VideoRecorderApp(QWidget):
 
         btn_layout = QHBoxLayout()
         btn_layout.addWidget(self.start_btn)
-        btn_layout.addWidget(self.pause_btn)
         btn_layout.addWidget(self.stop_btn)
         layout.addLayout(btn_layout)
 
@@ -88,18 +102,26 @@ class VideoRecorderApp(QWidget):
         self.setLayout(layout)
 
     def update_preview(self):
-        self.show_camera_frame(self.cam0, self.preview_label0)
-        self.show_camera_frame(self.cam2, self.preview_label2)
+        ret0, frame0 = self.cam0.read()
+        ret2, frame2 = self.cam2.read()
 
-    def show_camera_frame(self, cam, label):
-        ret, frame = cam.read()
-        if ret:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            h, w, ch = frame.shape
-            bytes_per_line = ch * w
-            qimg = QImage(frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
-            pixmap = QPixmap.fromImage(qimg)
-            label.setPixmap(pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio))
+        if ret0:
+            self.show_frame(frame0, self.preview_label0)
+            if self.recording:
+                self.writer0.write(frame0)
+
+        if ret2:
+            self.show_frame(frame2, self.preview_label2)
+            if self.recording:
+                self.writer2.write(frame2)
+
+    def show_frame(self, frame, label):
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        h, w, ch = rgb_frame.shape
+        bytes_per_line = ch * w
+        qimg = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+        pixmap = QPixmap.fromImage(qimg)
+        label.setPixmap(pixmap.scaled(label.width(), label.height(), Qt.AspectRatioMode.KeepAspectRatio))
 
     def log(self, message):
         self.log_output.append(message)
@@ -118,67 +140,39 @@ class VideoRecorderApp(QWidget):
         folder = f"/home/wytcorp/Projects/video_recorder/records/recording_{date}"
         subprocess.run(["mkdir", "-p", folder])
 
-        self.timer_preview.stop()
-        self.cam0.release()
-        self.cam2.release()
+        self.writer0 = cv2.VideoWriter(
+            f"{folder}/cam0.mp4", cv2.VideoWriter_fourcc(*'mp4v'), self.fps0, (self.w0, self.h0))
+        self.writer2 = cv2.VideoWriter(
+            f"{folder}/cam2.mp4", cv2.VideoWriter_fourcc(*'mp4v'), self.fps2, (self.w2, self.h2))
 
-        self.proc1 = subprocess.Popen([
+        self.audio_proc = subprocess.Popen([
             "ffmpeg",
-            "-f", "v4l2", "-input_format", "mjpeg", "-framerate", "30",
-            "-video_size", "1920x1080", "-i", "/dev/video0",
-
-            "-f", "alsa", "-ac", "2", "-i", "hw:1,0",
-
-            "-c:v", "libx264", "-preset", "ultrafast",
-            "-c:a", "aac", "-b:a", "128k",
-            f"{folder}/cam1_{date}.mp4"
-        ], stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
-
-        self.proc2 = subprocess.Popen([
-            "ffmpeg", "-f", "v4l2", "-input_format", "mjpeg", "-framerate", "30",
-            "-video_size", "1920x1080", "-i", "/dev/video2",
-            "-c:v", "libx264", "-preset", "ultrafast", f"{folder}/cam2_{date}.mkv"
-        ], stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+            "-f", "alsa",
+            "-ac", "1",  # 1 канал
+            "-ar", "16000",  # 16000 Гц (НЕ 44100!)
+            "-sample_fmt", "s16",  # формат S16_LE
+            "-i", "hw:0,0",
+            "-c:a", "aac",
+            "-b:a", "64k",
+            f"{folder}/audio.wav"
+        ])
 
         self.recording = True
-        self.paused = False
         self.status_label.setText("Статус: 🔴 Запис")
         self.log("▶️ Запис розпочато.")
 
-        self.log("🔍 FFmpeg log:")
-        self.log(self.proc1.stderr.read().decode('utf-8'))
-
-    def toggle_pause(self):
+    def stop_recording(self):
         if not self.recording:
             return
 
-        if self.paused:
-            self.proc1.send_signal(subprocess.signal.SIGCONT)
-            self.proc2.send_signal(subprocess.signal.SIGCONT)
-            self.status_label.setText("Статус: 🔴 Запис")
-            self.log("🔄 Запис продовжено.")
-            self.paused = False
-        else:
-            self.proc1.send_signal(subprocess.signal.SIGSTOP)
-            self.proc2.send_signal(subprocess.signal.SIGSTOP)
-            self.status_label.setText("Статус: ⏸️ На паузі")
-            self.log("⏸️ Запис призупинено.")
-            self.paused = True
+        self.recording = False
+        self.writer0.release()
+        self.writer2.release()
+        if self.audio_proc:
+            self.audio_proc.terminate()
 
-    def stop_recording(self):
-        if self.recording:
-            self.proc1.terminate()
-            self.proc2.terminate()
-            self.proc1 = None
-            self.proc2 = None
-            self.recording = False
-            self.paused = False
-            self.status_label.setText("Статус: ⏹️ Зупинено")
-            self.log("⏹️ Запис завершено.")
-
-            self.cam0 = cv2.VideoCapture(0)
-            self.cam2 = cv2.VideoCapture(2)
-            self.timer_preview.start(30)
+        self.status_label.setText("Статус: ⏹️ Зупинено")
+        self.log("⏹️ Запис завершено.")
 
     def closeEvent(self, event):
         self.cam0.release()
