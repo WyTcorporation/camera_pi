@@ -15,18 +15,17 @@ if __name__ == '__main__':
     audio = AudioRecorder()
     window = MainWindow(video0,video2, audio)
 
-    # gpio = GPIOController(video0, audio)
-
     video_recorders = {
         "cam0": video0,
         "cam2": video2
     }
+    gpio = GPIOController(video_recorders, audio, gui_ref=window)
     web = WebControl(video_recorders, audio, gui_ref=window)
     web.start_background()
     window.show()
 
-    sys.exit(app.exec())
-    # try:
-    #     sys.exit(app.exec())
-    # finally:
-    #     gpio.stop()
+    # sys.exit(app.exec())
+    try:
+        sys.exit(app.exec())
+    finally:
+        gpio.stop()
