@@ -23,9 +23,15 @@ def start_recording():
     os.makedirs(folder, exist_ok=True)
 
     cmd_cam1 = [
-        "ffmpeg", "-f", "v4l2", "-input_format", "mjpeg", "-framerate", "30",
+        "ffmpeg",
+        "-f", "v4l2", "-input_format", "mjpeg", "-framerate", "30",
         "-video_size", "1920x1080", "-i", "/dev/video0",
-        "-c:v", "copy", f"{folder}/cam1_{date}.mkv"
+
+        "-f", "alsa", "-ac", "2", "-i", "hw:1,0",
+
+        "-c:v", "libx264", "-preset", "ultrafast",
+        "-c:a", "aac", "-b:a", "128k",
+        f"{folder}/cam1_{date}.mp4"
     ]
 
     cmd_cam2 = [
