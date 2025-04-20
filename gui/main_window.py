@@ -1,12 +1,14 @@
+import cv2
 from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QVBoxLayout, QTextEdit, QHBoxLayout, QGridLayout
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QFont, QImage, QPixmap
+import numpy as np
 
 class MainWindow(QWidget):
     def __init__(self, video_recorder, audio_recorder):
         super().__init__()
         self.setWindowTitle("Video Recorder GUI")
-        self.setGeometry(100, 100, 960, 600)
+        self.setGeometry(100, 100, 600, 600)
 
         self.video = video_recorder
         self.audio = audio_recorder
@@ -67,10 +69,12 @@ class MainWindow(QWidget):
     def update_frame(self):
         frame = self.video.write_frame()
         if frame is not None:
-            rgb_frame = frame[..., ::-1]
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb_frame.shape
             bytes_per_line = ch * w
-            qimg = QImage(rgb_frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+            qimg = QImage(
+                rgb_frame.tobytes(), w, h, bytes_per_line, QImage.Format.Format_RGB888
+            )
             pixmap = QPixmap.fromImage(qimg)
             self.preview_label.setPixmap(pixmap.scaled(
                 self.preview_label.width(),
