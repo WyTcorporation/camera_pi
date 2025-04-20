@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Name=Video Recorder
+Comment=Зйомка проектів з двох камер Raspberry Pi
+Exec=/home/wytcorp/Projects/video_recorder/start.sh
+Icon=/home/wytcorp/Projects/video_recorder/static/images/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;Video;Development;
+StartupNotify=true
