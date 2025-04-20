@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QTimer, Qt
 from PyQt6.QtGui import QFont, QImage, QPixmap
 
+
 class VideoRecorderApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -32,7 +33,6 @@ class VideoRecorderApp(QWidget):
         self.fps0 = 15
         self.fps2 = 15
 
-
         self.writer0 = None
         self.writer2 = None
         self.audio_proc = None
@@ -44,7 +44,6 @@ class VideoRecorderApp(QWidget):
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_preview)
-
 
         # self.timer.start(1000 // int(max(self.fps0, self.fps2)))
         self.timer.start(1000 // 15)
@@ -128,7 +127,7 @@ class VideoRecorderApp(QWidget):
 
     def update_disk_space(self):
         total, used, free = shutil.disk_usage("/home/wytcorp/Projects/video_recorder/records/")
-        free_gb = free // (2**30)
+        free_gb = free // (2 ** 30)
         self.disk_label.setText(f"Вільно: {free_gb} ГБ")
 
     def start_recording(self):
@@ -146,14 +145,11 @@ class VideoRecorderApp(QWidget):
             f"{folder}/cam2.mp4", cv2.VideoWriter_fourcc(*'mp4v'), self.fps2, (self.w2, self.h2))
 
         self.audio_proc = subprocess.Popen([
-            "ffmpeg",
-            "-f", "alsa",
-            "-ac", "1",  # 1 канал
-            "-ar", "16000",  # 16000 Гц (НЕ 44100!)
-            "-sample_fmt", "s16",  # формат S16_LE
-            "-i", "hw:0,0",
-            "-c:a", "aac",
-            "-b:a", "64k",
+            "arecord",
+            "-D", "hw:0,0",
+            "-f", "S16_LE",
+            "-r", "16000",
+            "-c", "1",
             f"{folder}/audio.wav"
         ])
 
@@ -178,6 +174,7 @@ class VideoRecorderApp(QWidget):
         self.cam0.release()
         self.cam2.release()
         super().closeEvent(event)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
