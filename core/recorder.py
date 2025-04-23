@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 class VideoRecorder:
-    def __init__(self, device_index=0, resolution=(640, 480), fps=30, save_dir="/home/wytcorp/Projects/video_recorder/records"):
+    def __init__(self, device_index=0, resolution=(1920, 1080), fps=30, save_dir="/home/wytcorp/Projects/video_recorder/records"):
         self.device_index = device_index
         self.resolution = resolution
         self.fps = fps
