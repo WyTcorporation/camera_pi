@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 class VideoRecorder:
-    def __init__(self, device_index=0, resolution=(1920, 1080), fps=30, save_dir="/home/wytcorp/Projects/video_recorder/records"):
+    def __init__(self, device_index=0, resolution=(640, 480), fps=30, save_dir="/home/wytcorp/Projects/video_recorder/records"):
         self.device_index = device_index
         self.resolution = resolution
         self.fps = fps
@@ -15,7 +15,7 @@ class VideoRecorder:
         self.current_file = None
 
     def open_camera(self):
-        self.cam = cv2.VideoCapture(self.device_index)
+        self.cam = cv2.VideoCapture(self.device_index, cv2.CAP_V4L2)
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
         self.cam.set(cv2.CAP_PROP_FPS, self.fps)
@@ -40,7 +40,8 @@ class VideoRecorder:
         self.current_file = filename
         self.writer = cv2.VideoWriter(
             filename,
-            cv2.VideoWriter_fourcc(*'mp4v'),
+            # cv2.VideoWriter_fourcc(*'mp4v'),
+            cv2.VideoWriter_fourcc(*'MJPG'),
             self.fps,
             self.resolution
         )

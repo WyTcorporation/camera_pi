@@ -10,8 +10,8 @@ from core.gpio import GPIOController
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    video0 = VideoRecorder(device_index='/dev/video0')
-    video2 = VideoRecorder(device_index='/dev/video2')
+    video0 = VideoRecorder(device_index='/dev/video0',resolution=(1280,720), fps=10)
+    video2 = VideoRecorder(device_index='/dev/video2',resolution=(1280,720), fps=10)
     audio = AudioRecorder()
     window = MainWindow(video0,video2, audio)
 
