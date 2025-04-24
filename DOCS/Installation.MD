@@ -140,6 +140,7 @@ sda
 Побачиш /mnt/usb.
 
 desktop
+chmod +x ~/Projects/video_recorder/start.sh
 Скопіювати файл .desktop у папку:
 ```~/.local/share/applications/video_recorder.desktop```
 Оновити меню
