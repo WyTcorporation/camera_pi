@@ -139,4 +139,10 @@ sda
 
 Побачиш /mnt/usb.
 
+desktop
+Скопіювати файл .desktop у папку:
+```~/.local/share/applications/video_recorder.desktop```
+Оновити меню
+```update-desktop-database ~/.local/share/applications/```
+
 

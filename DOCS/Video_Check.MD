@@ -17,3 +17,18 @@ v4l2-ctl -d /dev/video2 --set-ctrl=exposure_auto=1
 v4l2-ctl -d /dev/video2 --set-ctrl=exposure_absolute=200
 v4l2-ctl -d /dev/video2 --set-ctrl=white_balance_temperature_auto=0
 v4l2-ctl -d /dev/video2 --set-ctrl=white_balance_temperature=4500
+
+
+Пробовал 
+
+Додай перед self.writer.write(frame):
+frame = cv2.rotate(frame, cv2.ROTATE_180)
+та
+frame = cv2.flip(frame, 1)  # 0 = вертикально, 1 = горизонтально, -1 = і те, і те
+
+🔄 Повернути на 180°	cv2.rotate(frame, cv2.ROTATE_180)
+↕️ Перевернути по Y	cv2.flip(frame, 0)
+↔️ Віддзеркалити по X	cv2.flip(frame, 1)
+🔃 Обидва напрямки	cv2.flip(frame, -1)
+
+Вирішив поки не гратися

@@ -4,7 +4,7 @@ import time
 
 class GPIOController:
     def __init__(self, video_recorders, audio_recorder,
-                 start_pin=17, stop_pin=22, led_pin=27, gui_ref=None,led_pins=(5, 6, 13)):
+                 start_pin=17, stop_pin=22,  gui_ref=None,led_pins=(5, 6, 13)):
         self.videos = video_recorders
         self.audio = audio_recorder
         self.gui = gui_ref
