@@ -1,20 +1,25 @@
+import os
+
 from gpiozero import Button, RGBLED
 import threading
 import time
 
+
 class GPIOController:
     def __init__(self, video_recorders, audio_recorder,
-                 start_pin=17, stop_pin=22,  gui_ref=None,led_pins=(5, 6, 13)):
+                 start_pin=17, stop_pin=22, shutdown_button=3, gui_ref=None, led_pins=(5, 6, 13)):
         self.videos = video_recorders
         self.audio = audio_recorder
         self.gui = gui_ref
 
         self.btn_start = Button(start_pin, pull_up=True, bounce_time=0.1)
         self.btn_stop = Button(stop_pin, pull_up=True, bounce_time=0.1)
+        self.shutdown_button = Button(shutdown_button, pull_up=True)
         self.rgb = RGBLED(red=led_pins[0], green=led_pins[1], blue=led_pins[2], active_high=True)
 
         self.btn_start.when_pressed = self.start_recording
         self.btn_stop.when_pressed = self.stop_recording
+        self.shutdown_button .when_pressed = self.shutdown_pi
 
         self.monitor_thread = threading.Thread(target=self._status_monitor, daemon=True)
         self.monitor_thread.start()
@@ -67,3 +72,7 @@ class GPIOController:
 
     def stop(self):
         self.rgb.off()
+
+    def shutdown_pi(self):
+        print("⏻ Вимикаємо Raspberry Pi...")
+        os.system("sudo shutdown now")
