@@ -13,9 +13,12 @@ class VideoRecorder:
         self.writer = None
         self.recording = False
         self.current_file = None
+        self.codec = 'MJPG'
+
 
     def open_camera(self):
         self.cam = cv2.VideoCapture(self.device_index, cv2.CAP_V4L2)
+        self.cam.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*self.codec))
         self.cam.set(cv2.CAP_PROP_FRAME_WIDTH, self.resolution[0])
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
         self.cam.set(cv2.CAP_PROP_FPS, self.fps)
@@ -41,7 +44,7 @@ class VideoRecorder:
         self.writer = cv2.VideoWriter(
             filename,
             # cv2.VideoWriter_fourcc(*'mp4v'),
-            cv2.VideoWriter_fourcc(*'MJPG'),
+            cv2.VideoWriter_fourcc(*self.codec),
             self.fps,
             self.resolution
         )
