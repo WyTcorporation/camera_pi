@@ -11,7 +11,7 @@ from core.gpio import GPIOController
 if __name__ == '__main__':
     app = QApplication(sys.argv)
 
-    video0 = VideoRecorder(device_index='/dev/video2', resolution=(3840, 2160), fps=30, save_dir="/mnt/nas")
+    video0 = VideoRecorder(device_index='/dev/video0', resolution=(3840, 2160), fps=30, save_dir="/mnt/nas")
     video2 = VideoRecorder(device_index='/dev/video2', resolution=(3840, 2160), fps=30, save_dir="/mnt/nas")
     # video0 = VideoRecorder(device_index='/dev/video0', resolution=(1920, 1080), fps=30)
     # video1 = VideoRecorder(device_index='/dev/video1', resolution=(3840, 2160), fps=30)
