@@ -78,6 +78,7 @@ class MainWindow(QWidget):
         self.log("⏹️ Запис завершено.")
 
     def update_frames(self):
+        # pass
         frame0 = self.video0.write_frame()
         frame2 = self.video2.write_frame()
 
@@ -85,19 +86,19 @@ class MainWindow(QWidget):
             rgb0 = cv2.cvtColor(frame0, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb0.shape
             qimg0 = QImage(rgb0.tobytes(), w, h, ch * w, QImage.Format.Format_RGB888)
-            self.preview_label0.setPixmap(QPixmap.fromImage(qimg0).scaled(
-                self.preview_label0.width(),
-                self.preview_label0.height(),
-                Qt.AspectRatioMode.KeepAspectRatio))
+            # self.preview_label0.setPixmap(QPixmap.fromImage(qimg0).scaled(
+            #     self.preview_label0.width(),
+            #     self.preview_label0.height(),
+            #     Qt.AspectRatioMode.KeepAspectRatio))
 
         if frame2 is not None:
             rgb2 = cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
             h, w, ch = rgb2.shape
             qimg2 = QImage(rgb2.tobytes(), w, h, ch * w, QImage.Format.Format_RGB888)
-            self.preview_label2.setPixmap(QPixmap.fromImage(qimg2).scaled(
-                self.preview_label2.width(),
-                self.preview_label2.height(),
-                Qt.AspectRatioMode.KeepAspectRatio))
+            # self.preview_label2.setPixmap(QPixmap.fromImage(qimg2).scaled(
+            #     self.preview_label2.width(),
+            #     self.preview_label2.height(),
+            #     Qt.AspectRatioMode.KeepAspectRatio))
 
     def log(self, message):
         self.log_output.append(message)

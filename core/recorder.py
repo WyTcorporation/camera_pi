@@ -23,6 +23,7 @@ class VideoRecorder:
         self.cam.set(cv2.CAP_PROP_FRAME_HEIGHT, self.resolution[1])
         self.cam.set(cv2.CAP_PROP_FPS, self.fps)
 
+
     def start(self):
         if self.recording:
             return
@@ -30,7 +31,7 @@ class VideoRecorder:
         if not self.cam or not self.cam.isOpened():
             self.open_camera()
 
-        now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        now = datetime.now().strftime("%Y-%m-%d_%H-%M")
         folder = os.path.join(self.save_dir, f"recording_{now}")
         os.makedirs(folder, exist_ok=True)
 
@@ -41,11 +42,12 @@ class VideoRecorder:
 
         filename = os.path.join(folder, f"cam{name_suffix}.mp4")
         self.current_file = filename
+        actual_fps = self.cam .get(cv2.CAP_PROP_FPS)
         self.writer = cv2.VideoWriter(
             filename,
             # cv2.VideoWriter_fourcc(*'mp4v'),
             cv2.VideoWriter_fourcc(*self.codec),
-            self.fps,
+            self.fps if self.fps > 0 else actual_fps,
             self.resolution
         )
         self.recording = True
